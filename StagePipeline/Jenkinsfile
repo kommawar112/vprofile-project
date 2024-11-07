@@ -32,7 +32,7 @@ pipeline {
                     // Build the Docker image
                     //sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} ."
                     //sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} -f ./Docker-files/app/multistage/Dockerfile"
-                    sh "docker buildx build -t ${ECR_REPOSITORY}:${IMAGE_TAG} -f ./Docker-files/app/multistage/ ."
+                    sh "docker buildx build -t ${ECR_REPOSITORY}:${IMAGE_TAG} -f ./Docker-files/app/multistage/Dockerfile"
 
 
                 }
