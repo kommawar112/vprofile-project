@@ -1,37 +1,69 @@
 pipeline {
-    
-	agent any
-/*	
-	tools {
-        maven "maven3"
+    agent any
+
+    environment {
+        // AWS ECR repository URL
+        ECR_REPOSITORY = 'sankethproject'
+        AWS_REGION = 'us-east-1' // Change to your region
+        IMAGE_TAG = "latest"  // You can use a different tag strategy
+        AWS_ACCOUNT_ID = '730335281764'
     }
-*/	
-    
-	
-    stages{
+
+    stages {
         
-        stage('BUILD'){
+
+        stage('Login to AWS ECR') {
             steps {
-                sh 'mvn clean install -DskipTests'
-            }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.war'
+                script {
+                    // Use the stored AWS credentials from Jenkins Credentials Plugin
+                    withCredentials([usernamePassword(credentialsId: 'aws-credentials-id', 
+                                                      usernameVariable: 'AWS_ACCESS_KEY_ID', 
+                                                      passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        // Authenticate to AWS ECR using the AWS CLI
+                        sh """
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        """
+                    }
                 }
             }
         }
 
-	stage('UNIT TEST'){
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn test'
+                script {
+                    // Build the Docker image
+                    //sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} ."
+                    sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} -f ./Docker-files/app/multistage/ ."
+
+                }
             }
         }
-        
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    // Tag the image for ECR
+                    sh "docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                }
+            }
         }
 
-
+        stage('Push Docker Image to ECR') {
+            steps {
+                script {
+                    // Push the image to AWS ECR
+                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                }
+            }
+        }
     }
 
-
+    post {
+        success {
+            echo "Docker image pushed to ECR successfully!"
+        }
+        failure {
+            echo "Build or push failed!"
+        }
+    }
 }
