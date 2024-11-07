@@ -27,10 +27,7 @@ pipeline {
                 sh 'mvn test'
             }
         }
-        post{
-            success{
-                echo "Hi bro whatsp"
-            }
+        
         }
 
 
