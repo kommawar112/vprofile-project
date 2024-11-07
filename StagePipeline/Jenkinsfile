@@ -31,7 +31,7 @@ pipeline {
                 script {
                     // Build the Docker image
                     //sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} ."
-                    sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} -f ./Docker-files/app/multistage/ ."
+                    sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} -f ./Docker-files/app/multistage/Dockerfile"
 
                 }
             }
