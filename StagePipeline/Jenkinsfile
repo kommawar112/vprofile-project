@@ -60,7 +60,7 @@ pipeline {
             steps {
                 script {
                     // Push the image to AWS ECR
-                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_LATEST_TAG}"
                 }
             }
         }
