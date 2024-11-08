@@ -1,37 +1,29 @@
 pipeline {
-    
-	agent any
-/*	
-	tools {
-        maven "maven3"
+    agent any
+
+    environment {
+        cluster = "javaprod"
+        service = "javaappprodsvc"
     }
-*/	
-    
-	
-    stages{
+
+    stages {          
+
         
-        stage('BUILD'){
-            steps {
-                sh 'mvn clean install -DskipTests'
-            }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.war'
+        stage("Deploy to ECS producation"){
+            steps{
+                withAWS(credentials: 'awscreds', region: 'us-east-1'){
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${service}  --force-new-deployment'
                 }
             }
         }
-
-	stage('UNIT TEST'){
-            steps {
-                sh 'mvn test'
-            }
-        }
-        
-        }
-
-
     }
 
-
+    post {
+        success {
+            echo "Docker image pushed to ECR successfully!"
+        }
+        failure {
+            echo "Build or push failed!"
+        }
+    }
 }
