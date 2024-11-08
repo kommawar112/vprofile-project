@@ -8,6 +8,8 @@ pipeline {
         IMAGE_TAG = "latest"  // You can use a different tag strategy
         AWS_ACCOUNT_ID = '730335281764'
         DOCKERFILE_DIR = './Docker-files/app/multistage'  // Directory where the Dockerfile is located
+        cluster = "javastaging"
+        service = "javaappsvc"
     }
 
     stages {
@@ -57,6 +59,13 @@ pipeline {
                 script {
                     // Push the image to AWS ECR
                     sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                }
+            }
+        }
+        stage("Deploy to ECS staging"){
+            steps{
+                withAWS(credentials: 'awscreds', region: 'us-east-1'){
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${service}  --forcedeployment'
                 }
             }
         }
