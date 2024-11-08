@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // AWS ECR repository URL
-        ECR_REPOSITORY = 'sankethproject'
+        ECR_REPOSITORY = 'vprofileapp'
         AWS_REGION = 'us-east-1' // Change to your region
         IMAGE_TAG = "latest"  // You can use a different tag strategy
         AWS_ACCOUNT_ID = '730335281764'
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     // Tag the image for ECR
-                    sh "docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                    sh "docker tag ${ECR_REPOSITORY}:${IMAGE_TAG}:${BUILD_NUMBER} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
                 }
             }
         }
